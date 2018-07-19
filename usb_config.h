@@ -22,7 +22,7 @@
 
 //USB_BULK_STREAM config
 #define USB_BULK_STREAM_BURST_LEN			16
-#define USB_BULK_STREAM_DMA_BUF_SIZE		(4)
+#define USB_BULK_STREAM_DMA_BUF_SIZE		(1)
 #define USB_BULK_STREAM_DMA_BUF_COUNT_P_2_U (8) /* USB_BULK_STREAM P_2_U channel buffer count */
 #define USB_BULK_STREAM_DMA_BUF_COUNT_U_2_P	(4) /* USB_BULK_STREAM U_2_P channel buffer count */
 

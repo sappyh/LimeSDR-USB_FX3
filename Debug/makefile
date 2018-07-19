@@ -4,7 +4,7 @@
 
 -include ../makefile.init
 
-RM := cs-rm -rf
+RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -12,62 +12,44 @@ RM := cs-rm -rf
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(C_DEPS)),)
--include $(C_DEPS)
-endif
 ifneq ($(strip $(ASM_DEPS)),)
 -include $(ASM_DEPS)
 endif
 ifneq ($(strip $(S_UPPER_DEPS)),)
 -include $(S_UPPER_DEPS)
 endif
+ifneq ($(strip $(C_DEPS)),)
+-include $(C_DEPS)
+endif
 endif
 
 -include ../makefile.defs
 
 # Add inputs and outputs from these tool invocations to the build variables 
-SECONDARY_LIST += \
-LimeSDR-USB_fx3_fw.lst \
-
-SECONDARY_SIZE += \
-LimeSDR-USB_fx3_fw.siz \
-
 
 # All Target
-all: LimeSDR-USB_fx3_fw.elf secondary-outputs
+all: LimeSDR_USB_FX3.elf secondary-outputs
 
 # Tool invocations
-LimeSDR-USB_fx3_fw.elf: $(OBJS) $(USER_OBJS)
+LimeSDR_USB_FX3.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: ARM Sourcery Windows GCC C Linker'
-	arm-none-eabi-gcc $(OBJS) $(USER_OBJS) $(LIBS) -T"C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3/firmware/common/fx3.ld" -nostartfiles -Wl,-Map,LimeSDR-USB_fx3_fw.map -Wl,-d -Wl,--no-wchar-size-warning -Wl,--entry,CyU3PFirmwareEntry "C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\firmware\u3p_firmware\lib\fx3_debug\cyfxapi.a" "C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\firmware\u3p_firmware\lib\fx3_debug\cyu3lpp.a" "C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\firmware\u3p_firmware\lib\fx3_debug\cyu3threadx.a"  "C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\ARM GCC\\arm-none-eabi\lib\libc.a" "C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\ARM GCC\\lib\gcc\arm-none-eabi\4.8.1\libgcc.a" -mcpu=arm926ej-s -mthumb-interwork -g -gdwarf-2 -o"LimeSDR-USB_fx3_fw.elf"
+	@echo 'Invoking: Cross ARM C Linker'
+	arm-none-eabi-gcc -mcpu=arm926ej-s -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -T "/home/saptarshi/Cypress/cyfx3sdk/fw_build/fx3_fw/fx3.ld" -nostartfiles -Xlinker --gc-sections -L"/home/saptarshi/Cypress/cyfx3sdk/fw_lib/1_3_4/fx3_debug" -Wl,-Map,"LimeSDR_USB_FX3.map" -Wl,-d -Wl,--no-wchar-size-warning -Wl,--entry,CyU3PFirmwareEntry -o "LimeSDR_USB_FX3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
 
-LimeSDR-USB_fx3_fw.lst: LimeSDR-USB_fx3_fw.elf
-	@echo 'Invoking: ARM Sourcery Windows GNU Create Listing'
-	arm-none-eabi-objdump -h -S LimeSDR-USB_fx3_fw.elf > "LimeSDR-USB_fx3_fw.lst"
-	@echo 'Finished building: $@'
-	@echo ' '
-
-LimeSDR-USB_fx3_fw.siz: LimeSDR-USB_fx3_fw.elf
-	@echo 'Invoking: ARM Sourcery Windows GNU Print Size'
-	arm-none-eabi-size  --format=berkeley LimeSDR-USB_fx3_fw.elf
-	@echo 'Finished building: $@'
-	@echo ' '
-
 # Other Targets
 clean:
-	-$(RM) $(SECONDARY_SIZE)$(OBJS)$(C_DEPS)$(ASM_DEPS)$(EXECUTABLES)$(SECONDARY_LIST)$(S_UPPER_DEPS) LimeSDR-USB_fx3_fw.elf
+	-$(RM) $(OBJS)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS) LimeSDR_USB_FX3.elf
 	-@echo ' '
 
 post-build:
-	-@echo 'Converting ELF to image (.img) format'
-	-'C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\util\elf2img\elf2img.exe' -i LimeSDR-USB_fx3_fw.elf -o LimeSDR-USB_fx3_fw.img
+	-@echo 'Generate boot-loadable binary image'
+	-/home/saptarshi/Cypress/cyfx3sdk/util/elf2img/elf2img -i LimeSDR_USB_FX3.elf -o LimeSDR_USB_FX3.img -v
 	-@echo ' '
 
-secondary-outputs: $(SECONDARY_LIST) $(SECONDARY_SIZE)
+secondary-outputs:
 
 .PHONY: all clean dependents
 .SECONDARY: post-build
